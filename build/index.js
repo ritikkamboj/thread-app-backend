@@ -16,8 +16,10 @@ const express_1 = __importDefault(require("express"));
 const server_1 = require("@apollo/server");
 const express4_1 = require("@apollo/server/express4"); // Import the specific middleware for Express 4
 const cors_1 = __importDefault(require("cors"));
+const db_1 = require("./lib/db");
 // jai baabe ki
 function init() {
+    var arguments_1 = arguments;
     return __awaiter(this, void 0, void 0, function* () {
         const app = (0, express_1.default)();
         app.use((0, cors_1.default)());
@@ -28,11 +30,35 @@ function init() {
     hello : String
     say(name :String) : String
     }
+    type Mutation {
+    createUser(firstName : String! , lastName : String! , email: String! , password : String! ) : Boolean
+    }
     `,
             resolvers: {
                 Query: {
                     hello: () => `hey there !`,
                     say: (_, { name }) => `Hey ${name}, How are you ?`,
+                },
+                Mutation: {
+                    createUser: (_1, _a) => __awaiter(this, [_1, _a], void 0, function* (_, { firstName, lastName, email, password, }) {
+                        console.log("Mutation received:", arguments_1);
+                        console.log("Received input:", {
+                            email,
+                            firstName,
+                            lastName,
+                            password,
+                        });
+                        yield db_1.prismaClient.user.create({
+                            data: {
+                                email,
+                                firstName,
+                                lastName,
+                                password,
+                                salt: "random_salt",
+                            },
+                        });
+                        return true;
+                    }),
                 },
             },
         });
